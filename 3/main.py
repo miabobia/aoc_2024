@@ -2,27 +2,27 @@ import re
 from enum import Enum
 from dataclasses import dataclass
 
-class StateType(Enum):
+class ComputerState(Enum):
     DO = 1
     DONT = 2
 
 @dataclass
 class Computer:
-    state = StateType.DO
+    state = ComputerState.DO
     sum = 0
     
     def execute_instruction(self, instruction: str):
-        if instruction.startswith("mul") and self.state == StateType.DO:
-            a, b = map(int, re.split(r'[(,)]', instruction)[1:3])
+        if self.state == ComputerState.DO and instruction.startswith("mul"):
+            a, b = map(int, filter(None, re.findall(r'\d*', instruction)))
             self.sum += a * b
         elif instruction.startswith("don't"):
-            self.state = StateType.DONT
+            self.state = ComputerState.DONT
         elif instruction.startswith("do"):
-            self.state = StateType.DO
+            self.state = ComputerState.DO
 
     def reset(self):
         self.sum = 0
-        self.state = StateType.DO
+        self.state = ComputerState.DO
 
 def parse_input(path: str) -> str:
     s: str
@@ -32,14 +32,13 @@ def parse_input(path: str) -> str:
 
 def part_one(input: str, toboggan_computer: Computer) -> int:
     pattern = r'mul[(]\d*,\d*[)]'
-    for match in re.findall(pattern, input):
-        toboggan_computer.execute_instruction(match)
+    for instruction in re.findall(pattern, input):
+        toboggan_computer.execute_instruction(instruction)
 
 def part_two(input: str, toboggan_computer: Computer) -> int:
     pattern = r"mul[(]\d*,\d*[)]|don't|do"
-    for match in re.findall(pattern, input):
-        print(f'sending instruction {match}')
-        toboggan_computer.execute_instruction(match)
+    for instruction in re.findall(pattern, input):
+        toboggan_computer.execute_instruction(instruction)
 
 if __name__ == '__main__':
     # 🛷🖥️🛷🖥️🛷🖥️🛷🖥️🛷🖥️🛷🖥️🛷🖥️🛷🖥️🛷
